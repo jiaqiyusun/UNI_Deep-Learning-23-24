@@ -1,4 +1,4 @@
-This archive contains everything you need to complete Homework 1. It contains
+#This archive contains everything you need to complete Homework 1. It contains
 the following files:
 
 download_octmnist.py
