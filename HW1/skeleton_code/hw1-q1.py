@@ -62,15 +62,19 @@ class LogisticRegression(LinearModel):
         learning_rate (float): keep it at the default value for your plots
         """
         # Q1.1b
-        label_scores = self.W.dot(x_i)[:, None]
-        # One-hot vector with the true label (num_labels x 1).
-        y_one_hot = np.zeros((np.size(self.W, 0), 1))
-        y_one_hot[y_i] = 1 #ey= [0,....1,....0]
-        # Softmax function.
+        # Get probability scores according to the model (num_labels x 1).
+        label_scores = np.expand_dims(self.W.dot(x_i), axis = 1)
+
+       # One-hot encode true label (num_labels x 1).
+        y_one_hot = np.zeros((np.size(self.W, 0),1))
+        y_one_hot[y_i] = 1
+
+        # Softmax function
         # This gives the label probabilities according to the model (num_labels x 1).
         label_probabilities = np.exp(label_scores) / np.sum(np.exp(label_scores))
+        
         # SGD update. W is num_labels x num_features.
-        self.W += learning_rate * (y_one_hot - label_probabilities) * x_i[None, :]
+        self.W += learning_rate * (y_one_hot - label_probabilities).dot(np.expand_dims(x_i, axis = 1).T)
         #raise NotImplementedError
 
 
@@ -79,15 +83,57 @@ class MLP(object):
     # linear models with no changes to the training loop or evaluation code
     # in main().
     def __init__(self, n_classes, n_features, hidden_size):
-        # Initialize an MLP with a single hidden layer.
-        raise NotImplementedError
+        # Initialize an MLP with a single hidden layer. W depends layers with the numbers of units
+        self.W1 = np.random.normal(0.1, 0.1, size = (hidden_size, n_features))
+        self.b1 = np.zeros(hidden_size)
+
+        self.W2 = np.random.normal(0.1, 0.1, size = (n_classes, hidden_size))
+        self.b2 = np.zeros(n_classes)
+        
+        #raise NotImplementedError
 
     def predict(self, X):
         # Compute the forward pass of the network. At prediction time, there is
         # no need to save the values of hidden nodes, whereas this is required
         # at training time.
-        raise NotImplementedError
+        # Forward propagation: z = wx + b x(next)=h(next) = g(z)
+        predicted_labels = []
+        for h_i in X:
 
+            z1 = self.W1.dot(h_i) + self.b1
+            h1 = self.relu(z1) #relu
+
+            z2 = self.W2.dot(h1) + self.b2
+            y_hat = self.softmax_prob(z2)#softmax
+
+            predicted_labels.append(np.argmax(y_hat))
+        predicted_labels = np.array(predicted_labels)
+        return predicted_labels
+        #raise NotImplementedError
+
+    @staticmethod
+    def softmax_prob(output):
+        # softmax transformation.
+        output -= np.max(output)
+        
+        # more efficient to calculate exponential only one time 
+        expo = np.exp(output)
+        
+        probs = expo / np.sum(expo)
+        
+        return probs
+
+    @staticmethod
+    def relu(input):
+        output = np.maximum(0.0, input)
+        return output
+
+    @staticmethod
+    def relu_deriv(x):
+        x[x>0] = 1
+        x[x<=0] = 0
+        return x
+    
     def evaluate(self, X, y):
         """
         X (n_examples x n_features)
@@ -103,7 +149,41 @@ class MLP(object):
         """
         Dont forget to return the loss of the epoch.
         """
-        raise NotImplementedError
+
+        for h_i, y_i in zip(X, y): 
+
+            # foward prop
+            z1 = self.W1.dot(h_i) + self.b1
+            h1 = self.relu(z1)
+            z2 = self.W2.dot(h1) + self.b2
+            output = self.softmax_prob(z2)
+
+            # back prop
+            grad_z2 = output
+            grad_z2[y_i] -= 1
+
+            # Gradient of hidden parameters.
+            grad_W2 = grad_z2[:,None]*(h1[None,:])
+            grad_b2 = grad_z2 
+
+            # Gradient of hidden layer below.
+            grad_h1 = self.W2.T.dot(grad_z2) 
+
+            # Gradient of hidden layer below before activation.
+            grad_z1= grad_h1* self.relu_deriv(z1)
+
+            # Gradient of hidden parameters. 
+            grad_W1 = grad_z1[:,None]*(h_i[None,:]) 
+            grad_b1 = grad_z1
+
+            # update stuff 
+
+            self.W1 -= learning_rate* grad_W1
+            self.b1 -= learning_rate* grad_b1
+            self.W2 -= learning_rate* grad_W2
+            self.b2 -= learning_rate* grad_b2
+
+        #raise NotImplementedError
 
 
 def plot(epochs, train_accs, val_accs):
