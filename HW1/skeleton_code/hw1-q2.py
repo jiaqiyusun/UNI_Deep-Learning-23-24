@@ -29,6 +29,7 @@ class LogisticRegression(nn.Module):
         super().__init__()
         # In a pytorch module, the declarations of layers needs to come after
         # the super __init__ line, otherwise the magic doesn't work.
+        self.linear = nn.Linear(n_features, n_classes)
 
     def forward(self, x, **kwargs):
         """
@@ -44,7 +45,8 @@ class LogisticRegression(nn.Module):
         forward pass -- this is enough for it to figure out how to do the
         backward pass.
         """
-        raise NotImplementedError
+        return self.linear(x)
+        #raise NotImplementedError
 
 
 # Q2.2
@@ -66,7 +68,28 @@ class FeedforwardNetwork(nn.Module):
         """
         super().__init__()
         # Implement me!
-        raise NotImplementedError
+        self.nlayers = layers
+        ffn_aux = []
+
+        activations = {"tanh": nn.Tanh(), "relu": nn.ReLU()}
+        self.activation = activations[activation_type]
+        self.dropout = nn.Dropout(dropout)
+        
+        ffn_aux.append(nn.Linear(n_features, hidden_size))
+        ffn_aux.append(self.activation)
+        ffn_aux.append(self.dropout)
+        
+        for i in range(layers):
+            print(i)
+            ffn_aux.append(nn.Linear(hidden_size, hidden_size))
+            ffn_aux.append(self.activation)
+            ffn_aux.append(self.dropout) #regularization technique
+        
+        ffn_aux.append(nn.Linear(hidden_size, n_classes))
+
+        self.ffn = nn.Sequential(*ffn_aux) # junta 3 functions 
+        print(self.ffn)
+        #raise NotImplementedError
 
     def forward(self, x, **kwargs):
         """
@@ -76,7 +99,8 @@ class FeedforwardNetwork(nn.Module):
         the output logits from x. This will include using various hidden
         layers, pointwise nonlinear functions, and dropout.
         """
-        raise NotImplementedError
+        return self.ffn(x)
+        #raise NotImplementedError
 
 
 def train_batch(X, y, model, optimizer, criterion, **kwargs):
@@ -97,7 +121,23 @@ def train_batch(X, y, model, optimizer, criterion, **kwargs):
     This function should return the loss (tip: call loss.item()) to get the
     loss as a numerical value that is not part of the computation graph.
     """
-    raise NotImplementedError
+    # clear
+    optimizer.zero_grad()
+
+    # process model and get predict y
+    y_hat = model(X)
+
+    # calculate loss x.grad += dloss/dx
+    loss = criterion(y_hat, y)
+     
+    loss.backward()
+
+    # update model weights
+    optimizer.step() # if SGD x += -lr * x.grad
+
+    return loss.item()
+
+    #raise NotImplementedError
 
 
 def predict(model, X):
@@ -147,7 +187,7 @@ def main():
     parser.add_argument('-epochs', default=20, type=int,
                         help="""Number of epochs to train for. You should not
                         need to change this value for your plots.""")
-    parser.add_argument('-batch_size', default=1, type=int,
+    parser.add_argument('-batch_size', default=1, type=int,#ex1 use batch_size =16
                         help="Size of training batch.")
     parser.add_argument('-learning_rate', type=float, default=0.01)
     parser.add_argument('-l2_decay', type=float, default=0)
@@ -172,7 +212,12 @@ def main():
 
     n_classes = torch.unique(dataset.y).shape[0]  # 10
     n_feats = dataset.X.shape[1]
-
+    print( str(n_classes) + " " +
+            str(n_feats) + " " +
+            str(opt.hidden_size) + " " +
+            str(opt.layers) + " "     +
+            str(opt.activation) + " " +
+            str(opt.dropout))
     # initialize the model
     if opt.model == 'logistic_regression':
         model = LogisticRegression(n_classes, n_feats)
@@ -247,6 +292,8 @@ def main():
         ylim = (0., 1.2)
     else:
         raise ValueError(f"Unknown model {opt.model}")
+    
+    print("plot")
     plot(epochs, losses, name=f'{opt.model}-training-loss-{config}', ylim=ylim)
     accuracy = { "Valid Accuracy": valid_accs }
     plot(epochs, accuracy, name=f'{opt.model}-validation-accuracy-{config}', ylim=(0., 1.))
