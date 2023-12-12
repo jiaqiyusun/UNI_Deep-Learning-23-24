@@ -46,10 +46,10 @@ class Perceptron(LinearModel):
         other arguments are ignored
         """
         # Q1.1a
-        y_hat = np.argmax(self.W.dot(x_i)) 
-        if y_hat != y_i:
+        y_pred = np.argmax(self.W.dot(x_i)) 
+        if y_pred != y_i:
             self.W[y_i, :] += x_i
-            self.W[y_hat, :] -= x_i
+            self.W[y_pred, :] -= x_i
 
         #raise NotImplementedError
 
@@ -104,24 +104,16 @@ class MLP(object):
             h1 = self.relu(z1) #relu
 
             z2 = self.W2.dot(h1) + self.b2
-            y_hat = self.softmax_prob(z2)#softmax
+            y_pred = self.softmax(z2)#softmax
 
-            predicted_labels.append(np.argmax(y_hat))
+            predicted_labels.append(np.argmax(y_pred))
         predicted_labels = np.array(predicted_labels)
         return predicted_labels
         #raise NotImplementedError
 
     @staticmethod
-    def softmax_prob(output):
-        # softmax transformation.
-        output -= np.max(output)
-        
-        # more efficient to calculate exponential only one time 
-        expo = np.exp(output)
-        
-        probs = expo / np.sum(expo)
-        
-        return probs
+    def softmax(output):
+        return np.exp(output) / sum(np.exp(output))
 
     @staticmethod
     def relu(input):
@@ -129,10 +121,10 @@ class MLP(object):
         return output
 
     @staticmethod
-    def relu_deriv(x):
-        x[x>0] = 1
-        x[x<=0] = 0
-        return x
+    def relu_deriv(z):
+        result = np.zeros_like(z)
+        result[z > 0] = 1
+        return result
     
     def evaluate(self, X, y):
         """
@@ -152,18 +144,18 @@ class MLP(object):
 
         for h_i, y_i in zip(X, y): 
 
-            # foward prop
+            # Forward Pass
             z1 = self.W1.dot(h_i) + self.b1
             h1 = self.relu(z1)
             z2 = self.W2.dot(h1) + self.b2
             output = self.softmax_prob(z2)
 
-            # back prop
+            # Backpropagation ????
             grad_z2 = output
-            grad_z2[y_i] -= 1
+            grad_z2[y_i] -= 1#?
 
             # Gradient of hidden parameters.
-            grad_W2 = grad_z2[:,None]*(h1[None,:])
+            grad_W2 = grad_z2[:,None]*(h1[:,None].T)
             grad_b2 = grad_z2 
 
             # Gradient of hidden layer below.
@@ -173,11 +165,10 @@ class MLP(object):
             grad_z1= grad_h1* self.relu_deriv(z1)
 
             # Gradient of hidden parameters. 
-            grad_W1 = grad_z1[:,None]*(h_i[None,:]) 
+            grad_W1 = grad_z1[:,None]*(h_i[:,None].T) 
             grad_b1 = grad_z1
 
-            # update stuff 
-
+            # update W and b
             self.W1 -= learning_rate* grad_W1
             self.b1 -= learning_rate* grad_b1
             self.W2 -= learning_rate* grad_W2
