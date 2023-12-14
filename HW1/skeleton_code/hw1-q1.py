@@ -113,6 +113,7 @@ class MLP(object):
 
     @staticmethod
     def softmax(output):
+        output -= np.max(output)
         return np.exp(output) / sum(np.exp(output))
 
     @staticmethod
@@ -142,13 +143,18 @@ class MLP(object):
         Dont forget to return the loss of the epoch.
         """
 
+        total_loss = 0
+
         for h_i, y_i in zip(X, y): 
 
             # Forward Pass
             z1 = self.W1.dot(h_i) + self.b1
             h1 = self.relu(z1)
             z2 = self.W2.dot(h1) + self.b2
-            output = self.softmax_prob(z2)
+            output = self.softmax(z2)
+
+            loss = -np.log(output[y_i])
+            total_loss += loss
 
             # Backpropagation ????
             grad_z2 = output
@@ -174,6 +180,9 @@ class MLP(object):
             self.W2 -= learning_rate* grad_W2
             self.b2 -= learning_rate* grad_b2
 
+        # Calculate average loss and return
+        avg_loss = total_loss / len(X)
+        return avg_loss
         #raise NotImplementedError
 
 
