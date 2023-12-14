@@ -68,27 +68,20 @@ class FeedforwardNetwork(nn.Module):
         """
         super().__init__()
         # Implement me!
-        self.nlayers = layers
         ffn_aux = []
 
         activations = {"tanh": nn.Tanh(), "relu": nn.ReLU()}
         self.activation = activations[activation_type]
         self.dropout = nn.Dropout(dropout)
         
-        ffn_aux.append(nn.Linear(n_features, hidden_size))
-        ffn_aux.append(self.activation)
-        ffn_aux.append(self.dropout)
-        
-        for i in range(layers):
-            print(i)
-            ffn_aux.append(nn.Linear(hidden_size, hidden_size))
-            ffn_aux.append(self.activation)
-            ffn_aux.append(self.dropout) #regularization technique
-        
+        ffn_aux = [nn.Linear(n_features, hidden_size), self.activation, self.dropout]
+
+        for _ in range(layers):
+            ffn_aux.extend([nn.Linear(hidden_size, hidden_size), self.activation, self.dropout])
+
         ffn_aux.append(nn.Linear(hidden_size, n_classes))
 
-        self.ffn = nn.Sequential(*ffn_aux) # junta 3 functions 
-        print(self.ffn)
+        self.ffn = nn.Sequential(*ffn_aux)
         #raise NotImplementedError
 
     def forward(self, x, **kwargs):
@@ -121,19 +114,20 @@ def train_batch(X, y, model, optimizer, criterion, **kwargs):
     This function should return the loss (tip: call loss.item()) to get the
     loss as a numerical value that is not part of the computation graph.
     """
-    # clear
+    # clear the gradients
     optimizer.zero_grad()
 
-    # process model and get predict y
+    # compute the model output
     y_hat = model(X)
 
-    # calculate loss x.grad += dloss/dx
+    # calculate loss
     loss = criterion(y_hat, y)
-     
+
+    # credit assignment 
     loss.backward()
 
     # update model weights
-    optimizer.step() # if SGD x += -lr * x.grad
+    optimizer.step()
 
     return loss.item()
 
@@ -283,8 +277,8 @@ def main():
         )
 
     losses = {
-        "Train Loss": train_losses
-        #"Valid Loss": valid_losses,
+        "Train Loss": train_losses,
+        "Valid Loss": valid_losses,
     }
     # Choose ylim based on model since logistic regression has higher loss
     if opt.model == "logistic_regression":

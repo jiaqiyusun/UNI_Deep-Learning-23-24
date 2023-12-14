@@ -1,0 +1,32 @@
+Learning_rate = 1
+Valid_acc = 0.4721
+Test_acc = 0.4726
+
+Learning_rate = 0.1
+Valid_acc = 0.8224
+Test_acc = 0.7372
+
+Learning_rate = 0.01
+Valid_acc = 0.8225
+Test_acc = 0.7372
+
+Learning_rate = 0.001
+Valid_acc = 0.7230
+Test_acc = 0.7391
+
+
+
+
+Worst results:
+Learning_rate = 1 -> Valid_acc = 0.4721
+
+Best_results:
+Learning_rate = 0.01 -> Valid_acc = 0.8225
+
+Best test accuracy:
+Test_acc = 0.7391 for learning_rate = 0.001
+
+The results improved a lot when using a learning rate of 0.1 instead of 1.
+The difference between the final accuracies of the learning rates 0.1 and 0.01
+is not significant, and even if the validation accuracy drops for the learning rate 0.001,
+the final test accuracy for this learning rate is similar to the other two.

@@ -1,0 +1,34 @@
+Batch size 256, 150 epochs no regularization no dropout:
+Valid_acc = 0.8615
+Test_acc = 0.7627
+
+Batch size 256, 150 epochs l2 regularization parameter:
+Valid_acc = 0.8653
+Test_acc = 0.7732
+
+Batch size 256, 150 epochs  dropout:
+Valid_acc = 0.8614
+Test_acc = 0.7921
+
+Worst results:
+Dropout = 0.2 -> Valid_acc = 0.8614
+
+Best_results:
+L2 regularization = 0.0001 -> Valid_acc = 0.8653
+
+Overfitting? Yes, there is overfitting, we can clearly see that the Train set loss
+keeps improving as it adjusts to the training data but there is a point, around
+60 epochs, where the validation set reaches it's lowest point and from that point on,
+the validation loss gets worse.
+
+Best test accuracy:
+Test accuracy = 0.7921 for dropout = 0.2
+
+    Both techniques aim to improve model generalization by preventing the overfitting
+that happens when none of these techniques is used.
+    L2 regularization adds a penalty term to the loss function based on the squared
+magnitudes of model weights, this way it discourages large weights, preventing the
+model from relying to heavily on any particular feature.
+    Dropout randomly drops a fraction of neurons from the network (in this case 0.2).
+This introduces noise and helps prevent overfitting by making the network more
+robust and less reliant on specific neurons.

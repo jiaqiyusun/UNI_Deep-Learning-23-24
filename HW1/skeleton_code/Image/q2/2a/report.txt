@@ -1,0 +1,26 @@
+batch_size = 16
+
+time:
+real	2m5,151s
+user	4m4,846s
+sys	0m1,547s
+
+test_accuracy:
+0.7372
+
+batch_size = 1024
+
+real	0m32,120s
+user	0m58,848s
+sys	0m0,792s
+
+test_accuracy:
+0.6919
+
+
+
+Best test accuracy: 0.7372
+The final test accuracy is slightly worse using a batch size of
+1024 (0.6919 accuracy) instead of a batch size of 16 (0,7372 accuracy)
+However, using a larger batch size the computation is 4 times faster.
+(32s using batch size of 1024 vs 2m5s using batch size of 16)
