@@ -176,7 +176,8 @@ def plot(epochs, plottables, name='', ylim=None):
     plt.legend()
     if ylim:
         plt.ylim(ylim)
-    plt.savefig('%s.pdf' % (name), bbox_inches='tight')
+    print("img")
+    plt.savefig('Image/q2/%s.png' % (name), bbox_inches='tight')
 
 
 def main():
@@ -282,8 +283,8 @@ def main():
         )
 
     losses = {
-        "Train Loss": train_losses,
-        "Valid Loss": valid_losses,
+        "Train Loss": train_losses
+        #"Valid Loss": valid_losses,
     }
     # Choose ylim based on model since logistic regression has higher loss
     if opt.model == "logistic_regression":
