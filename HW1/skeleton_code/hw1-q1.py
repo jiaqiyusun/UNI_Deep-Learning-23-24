@@ -192,14 +192,19 @@ def plot(epochs, train_accs, val_accs):
     plt.plot(epochs, train_accs, label='train')
     plt.plot(epochs, val_accs, label='validation')
     plt.legend()
+    plt.savefig('plot_mlp.png', bbox_inches='tight')
     plt.show()
 
 def plot_loss(epochs, loss):
+    print("plot loss")
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.plot(epochs, loss, label='train')
     plt.legend()
+    print("plot save")
+    plt.savefig('plot_loss.png', bbox_inches='tight')
     plt.show()
+    
 
 
 def main():
@@ -274,8 +279,9 @@ def main():
         ))
 
     # plot
-    plot(epochs, train_accs, valid_accs)
+    #plot(epochs, train_accs, valid_accs)
     if opt.model == 'mlp':
+        print("plot loss")
         plot_loss(epochs, train_loss)
 
 
