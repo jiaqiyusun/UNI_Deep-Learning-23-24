@@ -156,9 +156,9 @@ class MLP(object):
             loss = -np.log(output[y_i])
             total_loss += loss
 
-            # Backpropagation ????
+            # Backpropagation
             grad_z2 = output
-            grad_z2[y_i] -= 1#?
+            grad_z2[y_i] -= 1
 
             # Gradient of hidden parameters.
             grad_W2 = grad_z2[:,None]*(h1[:,None].T)
