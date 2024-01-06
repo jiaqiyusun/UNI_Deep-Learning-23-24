@@ -22,36 +22,67 @@ class CNN(nn.Module):
         self.no_maxpool = no_maxpool
         if not no_maxpool:
             # Implementation for Q2.1
-            raise NotImplementedError
+            self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3, stride=1, padding=1)
+            self.relu1 = nn.ReLU()
+            self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+            
+            self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=1, padding=0)
+            self.relu2 = nn.ReLU()
+            self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+            
+            # Calculate the number of input features for the fully connected layer
+            input_features = 16 * 6 * 6
+            #raise NotImplementedError
         else:
             # Implementation for Q2.2
-            raise NotImplementedError
+            self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3, stride=2, padding=1)
+            self.relu1 = nn.ReLU()
+            
+            self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=2, padding=0)
+            self.relu2 = nn.ReLU()
+
+            input_features = 16 * 6 * 6
+            #raise NotImplementedError
         
         # Implementation for Q2.1 and Q2.2
-        raise NotImplementedError
+        self.fc1 = nn.Linear(input_features, 320)
+        self.relu3 = nn.ReLU()
+        self.drop = nn.Dropout(p=dropout_prob)
+        self.fc2 = nn.Linear(320, 120)
+        self.relu4 = nn.ReLU()
+        self.fc3 = nn.Linear(120, 4)
+        #raise NotImplementedError
         
     def forward(self, x):
         # input should be of shape [b, c, w, h]
+        x = x.view(-1,1,28, 28)
+        
         # conv and relu layers
+        x = self.conv1(x)
+        x = self.relu1(x)
 
         # max-pool layer if using it
         if not self.no_maxpool:
-            raise NotImplementedError
+            x = self.maxpool1(x)
         
         # conv and relu layers
-        
+        x = self.conv2(x)
+        x = self.relu2(x)
 
         # max-pool layer if using it
         if not self.no_maxpool:
-            raise NotImplementedError
+            x = self.maxpool2(x)
         
         # prep for fully connected layer + relu
-        
+        x = x.view(x.size(0), -1)
+        x =self.relu3(self.fc1(x))
+
         # drop out
         x = self.drop(x)
 
         # second fully connected layer + relu
-        
+        x = self.relu4(self.fc2(x))
+
         # last fully connected layer
         x = self.fc3(x)
         
@@ -102,8 +133,7 @@ def plot(epochs, plottable, ylabel='', name=''):
 
 
 def get_number_trainable_params(model):
-    ## TO IMPLEMENT - REPLACE return 0
-    return 0
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
 def main():
